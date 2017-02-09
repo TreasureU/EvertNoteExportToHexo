@@ -214,7 +214,7 @@ for source_html_path in export_html_list:
     source_content = safeGetFileContentStr(source_html_path)
     if not source_content:
         print("Error: source_html_path is error! source_html_path = %s", source_html_path)
-        source_content = source_content.replace(need_replace_str, replace_str)
+    source_content = source_content.replace(need_replace_str, replace_str)
 
     source_append_content = "---\n" + "title: " + note_name + "\n" + "date: " + time.strftime('%Y-%m-%d %H:%M:%S',
                                                                                               time.localtime(
