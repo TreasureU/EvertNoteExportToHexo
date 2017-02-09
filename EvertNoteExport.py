@@ -35,11 +35,11 @@ target_dest_dir = "/Users/chengjianfeng/Documents/Github/Hexo/hexo/source"
 
 # 源目录下,导出的 html 和 .resources 文件夹 都在这个目录下
 # 注意,请不要随意修改 html 和 .resources 文件夹的名字,否则部署到 hexo 上会出现链接错误
-target_source_dir = "/Users/chengjianfeng/Desktop/iOS笔记"
+target_source_dir = "/Users/chengjianfeng/Desktop/iOS读书笔记"
 
 # 表示此次导入的内容的分类 以及 标签
-target_categories = "iOS笔记"     # 如果不配置,默认设为 "默认"
-target_tags = ""
+target_categories = ["iOS笔记"]     # 默认设为 "默认"
+target_tags = ["iOS", "读书笔记"]
 
 
 # ------------  全局函数区  -------------------
@@ -185,13 +185,24 @@ def safeCopyDirToNewDir(sourceDir, targetDir):
     return True
 
 
-#  ---------------  正式代码区  -----------------
+def formatCategoriesAndTags(sourceList):
+    if not validateList(sourceList):
+        return ""
+    elif len(sourceList) == 1:
+        return sourceList[0]
+    else:
+        ret = "\n\t- ".join(sourceList)
+        ret = "\n\t- " + ret
+        return ret
+
+
+# ---------------  正式代码区  -----------------
 
 target_dest_html_dir = target_dest_dir + "/_posts"
 target_dest_resource_dir = target_dest_dir + "/Resources"
 
-if not validateString(target_categories):
-    target_categories = "默认"
+if not validateList(target_categories):
+    target_categories = ["默认"]
 
 export_dir_list = getAllDirsInSpecialDir(target_source_dir, True)
 export_html_list = glob.glob(target_source_dir + "/*.html")
@@ -200,10 +211,11 @@ if not validateList(export_html_list):
     print("Error: target_source_dir is empty,target_source_dir = %s", target_source_dir)
 
 for source_html_path in export_html_list:
-    if os.path.basename(source_html_path) == "index.html":
+    source_html_basename = os.path.basename(source_html_path)
+    if source_html_basename == "index.html" or len(source_html_basename) < 5 or source_html_basename[-5:] != ".html":
         continue
 
-    note_name = os.path.basename(source_html_path).split(".")[0]
+    note_name = source_html_basename[0:-5]
     url_name = urllib.request.quote(note_name)
 
     need_replace_str = url_name + ".resources"
@@ -218,7 +230,8 @@ for source_html_path in export_html_list:
 
     source_append_content = "---\n" + "title: " + note_name + "\n" + "date: " + time.strftime('%Y-%m-%d %H:%M:%S',
                                                                                               time.localtime(
-                                                                                                      time.time())) + "\n" + "tags: " + target_tags + "\n" + "categories: " + target_categories + "\n---\n\n"
+                                                                                                      time.time())) + "\n" + "tags: " + formatCategoriesAndTags(
+        target_tags) + "\n" + "categories: " + formatCategoriesAndTags(target_categories) + "\n---\n\n"
     source_content = source_append_content + source_content
     safeWriteFileContentStr(dest_html_path, source_content)
 
